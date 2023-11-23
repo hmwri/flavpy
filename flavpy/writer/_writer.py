@@ -15,7 +15,7 @@ from typing import Literal, BinaryIO, Final
 
 class FlavWriter:
     def __init__(self, path, modal: Literal["taste", "scent"], codec: supported_codec_type, fps: float,
-                 add_modal:bool=False, base_mp4:str|None=None):
+                 add_modal_on:str|None=None):
         self.path = path
         if codec not in supported_codecs:
             raise Exception(f"codec : {codec} is not supported")
@@ -31,10 +31,8 @@ class FlavWriter:
         else:
             raise Exception(f"modal:{modal} is not supported.")
 
-        if add_modal:
-            if base_mp4 is None:
-                raise Exception("Please specify base mp4 path")
-            self.parsed = Parser(base_mp4).parse()
+        if add_modal_on is not None:
+            self.parsed = Parser(add_modal_on).parse()
         else:
             self.parsed = EmptyMp4Creator.create(
                 "mp41",

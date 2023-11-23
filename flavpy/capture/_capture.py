@@ -79,7 +79,7 @@ class FlavCapture:
         self.media_duration = track.media.header.duration
 
         self.sample_table = self.flavMp4.sample_tables[component_subtype]
-        self.time_scale = self.flavMp4.mov_header.time_scale
+        self.time_scale = track.media.header.time_scale
 
         self.codec = self.sample_table.sample_description.sample_description_table[0].data_format
 
@@ -109,19 +109,25 @@ class FlavCapture:
     def __exit__(self, exc_type, exc_value, traceback):
         self.release()
 
-    def read(self) -> tuple[bool, np.ndarray|None, int]:
+    def read(self, grab=False) -> tuple[bool, np.ndarray|None, int] | None:
         if self.chunk_reader is None:
+            if grab:
+                return
             return False, None, 0
         ok, data, sample = self.chunk_reader.read_sample()
         if not ok:
             self.chunk_i += 1
             if self.chunk_i >= len(self.media_data.data) :
+                if grab:
+                    return
                 return False, None, 0
             self.chunk_reader = ChunkReader(self.__f, self.media_data.data[self.chunk_i])
             ok, data, sample = self.chunk_reader.read_sample()
         delta = sample.delta
         self.frame_i += 1
         self.t += delta
+        if grab:
+            return
         return True, self.decoder(data), delta
 
     def seek(self, pos:int | float, seek_mode:int):
