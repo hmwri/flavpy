@@ -2,14 +2,14 @@ import os
 from io import BytesIO
 
 import numpy as np
-from TsMovieComposer.analyzer.components import SampleTableComponent
-from TsMovieComposer.parser import Parser
-from TsMovieComposer.analyzer import analyze, FlavMP4
-from TsMovieComposer.analyzer.components import TrackComponent
-from TsMovieComposer.analyzer.media_data import StreamingSampleData, ChunkData, SampleData, MediaData
-from TsMovieComposer.codec import supported_codecs, get_encoder, supported_codec_type
-from TsMovieComposer.composer.utils import EmptyMp4Creator, TrackBoxCreator, SampleTableCreator
-from TsMovieComposer.composer import Composer
+from flavtool.analyzer.components import SampleTableComponent
+from flavtool.parser import Parser
+from flavtool.analyzer import analyze, FlavMP4
+from flavtool.analyzer.components import TrackComponent
+from flavtool.analyzer.media_data import StreamingSampleData, ChunkData, SampleData, MediaData
+from flavtool.codec import supported_codecs, get_encoder, supported_codec_type
+from flavtool.composer.utils import EmptyMp4Creator, TrackBoxCreator, SampleTableCreator
+from flavtool.composer import Composer
 from typing import Literal, BinaryIO, Final
 
 

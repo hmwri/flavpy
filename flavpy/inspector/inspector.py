@@ -1,7 +1,7 @@
 from typing import Literal
 
-from TsMovieComposer.parser import Parser
-from TsMovieComposer.analyzer import analyze
+from flavtool.parser import Parser
+from flavtool.analyzer import analyze
 
 class Inspector:
     def __init__(self, path):

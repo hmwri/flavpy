@@ -3,10 +3,10 @@ from io import BytesIO
 
 import numpy as np
 
-from TsMovieComposer.parser import Parser
-from TsMovieComposer.analyzer import analyze
-from TsMovieComposer.analyzer.media_data import StreamingSampleData, ChunkData
-from TsMovieComposer.codec import supported_codecs, get_decoder ,supported_codec_type
+from flavtool.parser import Parser
+from flavtool.analyzer import analyze
+from flavtool.analyzer.media_data import StreamingSampleData, ChunkData
+from flavtool.codec import supported_codecs, get_decoder ,supported_codec_type
 from typing import Literal, BinaryIO, Final
 
 SEEK_FRAME_INDEX : Final[int] = 0
