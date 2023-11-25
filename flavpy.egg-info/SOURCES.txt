@@ -1,10 +1,14 @@
+README.md
 setup.py
 flavpy/__init__.py
 flavpy.egg-info/PKG-INFO
 flavpy.egg-info/SOURCES.txt
 flavpy.egg-info/dependency_links.txt
+flavpy.egg-info/requires.txt
 flavpy.egg-info/top_level.txt
 flavpy/capture/__init__.py
 flavpy/capture/_capture.py
+flavpy/inspector/__init__.py
+flavpy/inspector/inspector.py
 flavpy/writer/__init__.py
 flavpy/writer/_writer.py

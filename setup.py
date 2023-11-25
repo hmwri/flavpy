@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='flavpy',
-    version='0.1',
+    version='1.0.1',
     author="Taiyu Honma",
     author_email="ev220526@meiji.ac.jp",
     description="味覚情報を埋め込み可能なファイル形式:FlavMP4のキャプチャ、書き出しを行う",
@@ -18,4 +18,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    install_requires=["flavtool"],
+
 )
