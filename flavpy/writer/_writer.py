@@ -8,6 +8,7 @@ from flavtool.analyzer import analyze, FlavMP4
 from flavtool.analyzer.components import TrackComponent
 from flavtool.analyzer.media_data import StreamingSampleData, ChunkData, SampleData, MediaData
 from flavtool.codec import supported_codecs, get_encoder, supported_codec_type
+from flavtool.codec.codec_options import MixCodecOption, CodecOption
 from flavtool.composer.utils import EmptyMp4Creator, TrackBoxCreator, SampleTableCreator
 from flavtool.composer import Composer
 from typing import Literal, BinaryIO, Final
@@ -15,11 +16,12 @@ from typing import Literal, BinaryIO, Final
 
 class FlavWriter:
     def __init__(self, path, modal: Literal["taste", "scent"], codec: supported_codec_type, fps: float,
-                 add_modal_on:str|None=None):
+                 add_modal_on:str|None=None,codec_option : CodecOption | None = None):
         self.path = path
         if codec not in supported_codecs:
             raise Exception(f"codec : {codec} is not supported")
         self.codec: supported_codec_type = codec
+        self.codec_option = codec_option
         self.fps = fps
         self.media_time_scale: int = int(fps * 1000)
 
@@ -72,7 +74,13 @@ class FlavWriter:
     def export(self):
         if len(self.chunks[0]) == 0:
             raise Exception("There is no data")
-        sample_table = SampleTableCreator(self.chunks, codec=self.codec).make_sample_table()
+
+        if self.codec == "rmix":
+            if self.codec_option is None:
+                self.codec_option = MixCodecOption.default()
+
+
+        sample_table = SampleTableCreator(self.chunks, codec=self.codec, codec_option=self.codec_option).make_sample_table()
         mov_time_scale = self.flavMp4.mov_header.time_scale
         track_duration = int(self.chunks[-1].end_time * mov_time_scale / self.media_time_scale)
         if self.flavMp4.mov_header.duration < track_duration:

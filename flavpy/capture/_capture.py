@@ -7,7 +7,9 @@ from flavtool.parser import Parser
 from flavtool.analyzer import analyze
 from flavtool.analyzer.media_data import StreamingSampleData, ChunkData
 from flavtool.codec import supported_codecs, get_decoder ,supported_codec_type
+from flavtool.codec.codec_options import  *
 from typing import Literal, BinaryIO, Final
+
 
 SEEK_FRAME_INDEX : Final[int] = 0
 SEEK_MEDIA_TIME : Final[int] = 1
@@ -60,6 +62,8 @@ class FlavCapture:
         self.__f = open(path, "rb")
         self.parsed = Parser(path, fp=self.__f).parse(read_mdat_bytes=False)
         self.flavMp4 = analyze(self.parsed)
+
+
         component_subtype : Literal['tast', 'scnt']
         if modal == "taste":
             component_subtype = "tast"
@@ -79,9 +83,13 @@ class FlavCapture:
         self.media_duration = track.media.header.duration
 
         self.sample_table = self.flavMp4.sample_tables[component_subtype]
+
         self.time_scale = track.media.header.time_scale
 
         self.codec = self.sample_table.sample_description.sample_description_table[0].data_format
+        self.codec_option = None
+        if self.codec == "rmix":
+            self.codec_option = MixCodecOption(self.sample_table.sample_description.sample_description_table[0].mix_info.infos)
 
         if self.codec not in supported_codecs:
             raise Exception(f"codec : {self.codec} is not supported")
