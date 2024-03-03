@@ -9,7 +9,7 @@ from flavtool.analyzer.media_data import StreamingSampleData, ChunkData
 from flavtool.codec import supported_codecs, get_decoder ,supported_codec_type
 from flavtool.codec.codec_options import  *
 from typing import Literal, BinaryIO, Final
-
+import cv2
 
 SEEK_FRAME_INDEX : Final[int] = 0
 SEEK_MEDIA_TIME : Final[int] = 1
@@ -59,6 +59,12 @@ class ChunkReader :
 
 class FlavCapture:
     def __init__(self, path:str, modal:Literal['taste', 'scent']):
+
+        cap = cv2.VideoCapture(path)
+
+        self.video_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.video_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
         self.__f = open(path, "rb")
         self.parsed = Parser(path, fp=self.__f).parse(read_mdat_bytes=False)
         self.flavMp4 = analyze(self.parsed)

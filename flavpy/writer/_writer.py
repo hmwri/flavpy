@@ -1,6 +1,6 @@
 import os
 from io import BytesIO
-
+import cv2
 import numpy as np
 from flavtool.analyzer.components import SampleTableComponent
 from flavtool.parser import Parser
@@ -44,6 +44,10 @@ class FlavWriter:
             )
 
 
+        cap = cv2.VideoCapture(path)
+
+        self.video_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+        self.video_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
         self.flavMp4 = analyze(self.parsed)
         self.data : list[np.ndarray] = []
@@ -52,11 +56,13 @@ class FlavWriter:
 
 
 
+
+
     def write(self, data:np.ndarray, frame_delta=1):
         encoder = get_encoder(self.codec)
         sample = SampleData(encoder(data), delta=int(frame_delta/self.fps*self.media_time_scale))
         if len(self.chunks[-1]) >= self.__sampler_per_chunk:
-            self.chunks.append(ChunkData(samples=[sample], media_type=self.component_subtype,
+            self.chunks.append(ChunkData(samples=[], media_type=self.component_subtype,
                                          begin_time=self.chunks[-1].end_time))
         self.chunks[-1].samples.append(sample)
 
@@ -66,6 +72,7 @@ class FlavWriter:
 
 
     def __enter__(self):
+
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
@@ -83,6 +90,7 @@ class FlavWriter:
         sample_table = SampleTableCreator(self.chunks, codec=self.codec, codec_option=self.codec_option).make_sample_table()
         mov_time_scale = self.flavMp4.mov_header.time_scale
         track_duration = int(self.chunks[-1].end_time * mov_time_scale / self.media_time_scale)
+
         if self.flavMp4.mov_header.duration < track_duration:
             self.flavMp4.mov_header.duration = track_duration
         composer = Composer(flav_mp4=self.flavMp4)
