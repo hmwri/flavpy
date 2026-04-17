@@ -93,6 +93,39 @@ with flavpy.FlavWriter(
 
 コンテキストマネージャを使わない場合は、書き込み後に `writer.export()` を呼び出してください。
 
+### codec を選ぶ
+
+`flavpy` では `FlavWriter(..., codec=...)` に `flavtool` の味 codec 名を指定します。
+
+| codec | 用途 | 入力データ |
+| --- | --- | --- |
+| `raw5` | 基本五味など、5 次元の味ベクトルをそのまま保存する | `np.ndarray` / `dtype=np.uint8` / 長さ 5 |
+| `rmix` | 複数の味物質の混合比を保存する | `np.ndarray` / `dtype=np.uint8` |
+
+`rmix` を使う場合は、混合に使う味物質名、濃度、最大量を `MixCodecOption` として渡せます。
+
+```python
+import numpy as np
+import flavpy
+from flavtool.codec.codec_options import MixCodecOption
+
+codec_option = MixCodecOption.generate(
+    names=["NaCl", "CitA", "Fruc", "Pota", "Glut"],
+    concentrations=[17, 17, 30, 20, 9],
+    max_amounts=100,
+)
+
+with flavpy.FlavWriter(
+    "mixed_taste.mp4",
+    "taste",
+    codec="rmix",
+    fps=30,
+    add_modal_on="input.mp4",
+    codec_option=codec_option,
+) as writer:
+    writer.write(np.array([20, 5, 80, 10, 30], dtype=np.uint8))
+```
+
 ### トラックを確認する
 
 `Inspector` は、ファイルに含まれる track の種類を確認するための簡易 API です。
@@ -207,6 +240,39 @@ with flavpy.FlavWriter("output.mp4", "taste", codec="raw5", fps=60, add_modal_on
 ```
 
 If you do not use the context manager, call `writer.export()` after writing.
+
+### Choose a Codec
+
+`FlavWriter(..., codec=...)` accepts taste codec names provided by `flavtool`.
+
+| codec | Use case | Input data |
+| --- | --- | --- |
+| `raw5` | store a 5-dimensional taste vector directly | `np.ndarray`, `dtype=np.uint8`, length 5 |
+| `rmix` | store a mixture ratio for multiple taste substances | `np.ndarray`, `dtype=np.uint8` |
+
+For `rmix`, pass the mixture metadata with `MixCodecOption`.
+
+```python
+import numpy as np
+import flavpy
+from flavtool.codec.codec_options import MixCodecOption
+
+codec_option = MixCodecOption.generate(
+    names=["NaCl", "CitA", "Fruc", "Pota", "Glut"],
+    concentrations=[17, 17, 30, 20, 9],
+    max_amounts=100,
+)
+
+with flavpy.FlavWriter(
+    "mixed_taste.mp4",
+    "taste",
+    codec="rmix",
+    fps=30,
+    add_modal_on="input.mp4",
+    codec_option=codec_option,
+) as writer:
+    writer.write(np.array([20, 5, 80, 10, 30], dtype=np.uint8))
+```
 
 ### Inspect Tracks
 
