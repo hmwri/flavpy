@@ -8,6 +8,21 @@ TasteColorizer では、既存映像に含まれる飲食物を GPT-4 Vision な
 
 参考: https://www.honma.site/ja/works/TasteColorizer/
 
+### flavpy の位置づけ
+
+```mermaid
+flowchart LR
+    Video[既存のMP4] --> Writer[FlavWriter]
+    Taste[推定/計測された味データ] --> Writer
+    Writer --> FlavMP4[FlavMP4]
+    FlavMP4 --> Capture[FlavCapture]
+    Capture --> App[再生・解析・味覚提示アプリ]
+    FlavMP4 --> Inspector[Inspector]
+    Inspector --> Tracks[video / sound / taste / scent tracks]
+```
+
+`flavpy` は `flavtool` の parser / analyzer / codec / composer を内部で使い、アプリケーションから扱いやすい `FlavCapture`、`FlavWriter`、`Inspector` を提供します。
+
 ### インストール
 
 ```bash
@@ -37,6 +52,24 @@ with flavpy.FlavCapture("taste.mp4", modal="taste") as cap:
 - `data`: デコードされた味データ
 - `delta`: メディア時間基準のサンプル持続時間
 
+### 任意の位置から読み込む
+
+`FlavCapture.seek()` を使うと、フレーム番号、メディア時間、実時間のいずれかで読み込み位置を移動できます。
+
+```python
+import flavpy
+from flavpy import SEEK_FRAME_INDEX, SEEK_REAL_TIME
+
+with flavpy.FlavCapture("taste.mp4", modal="taste") as cap:
+    cap.seek(120, SEEK_FRAME_INDEX)
+    ret, data, delta = cap.read()
+    print("frame 120:", data)
+
+    cap.seek(3.5, SEEK_REAL_TIME)
+    ret, data, delta = cap.read()
+    print("at 3.5 sec:", data)
+```
+
 ### 味データを書き込む
 
 ```python
@@ -60,6 +93,31 @@ with flavpy.FlavWriter(
 
 コンテキストマネージャを使わない場合は、書き込み後に `writer.export()` を呼び出してください。
 
+### トラックを確認する
+
+`Inspector` は、ファイルに含まれる track の種類を確認するための簡易 API です。
+
+```python
+import flavpy
+
+inspector = flavpy.Inspector("output.mp4")
+print(inspector.get_track())
+# 例: ["video", "sound", "taste"]
+```
+
+### 味データだけの FlavMP4 を作る
+
+`add_modal_on` を指定しない場合、空の MP4 構造から taste / scent track を作成します。
+
+```python
+import numpy as np
+import flavpy
+
+with flavpy.FlavWriter("taste_only.mp4", "taste", codec="raw5", fps=30) as writer:
+    writer.write(np.array([10, 20, 30, 40, 50], dtype=np.uint8))
+    writer.write(np.array([20, 30, 40, 50, 60], dtype=np.uint8))
+```
+
 ### 構成
 
 - `flavpy/capture/`: FlavMP4 の読み込み
@@ -79,6 +137,21 @@ with flavpy.FlavWriter(
 In the TasteColorizer project, taste values estimated from food scenes are attached to existing videos so that viewers can interact with and taste specific parts of the video. This repository provides the FlavMP4 capture/write layer.
 
 Reference: https://www.honma.site/ja/works/TasteColorizer/
+
+### Role of flavpy
+
+```mermaid
+flowchart LR
+    Video[Existing MP4] --> Writer[FlavWriter]
+    Taste[Estimated or measured taste data] --> Writer
+    Writer --> FlavMP4[FlavMP4]
+    FlavMP4 --> Capture[FlavCapture]
+    Capture --> App[Playback / analysis / taste-output app]
+    FlavMP4 --> Inspector[Inspector]
+    Inspector --> Tracks[video / sound / taste / scent tracks]
+```
+
+`flavpy` wraps the lower-level parser, analyzer, codec, and composer features from `flavtool` into application-facing APIs.
 
 ### Install
 
@@ -105,6 +178,22 @@ with flavpy.FlavCapture("taste.mp4", modal="taste") as cap:
         print(data, delta)
 ```
 
+### Seek Before Reading
+
+```python
+import flavpy
+from flavpy import SEEK_FRAME_INDEX, SEEK_REAL_TIME
+
+with flavpy.FlavCapture("taste.mp4", modal="taste") as cap:
+    cap.seek(120, SEEK_FRAME_INDEX)
+    ret, data, delta = cap.read()
+    print("frame 120:", data)
+
+    cap.seek(3.5, SEEK_REAL_TIME)
+    ret, data, delta = cap.read()
+    print("at 3.5 sec:", data)
+```
+
 ### Write Taste Data
 
 ```python
@@ -118,6 +207,27 @@ with flavpy.FlavWriter("output.mp4", "taste", codec="raw5", fps=60, add_modal_on
 ```
 
 If you do not use the context manager, call `writer.export()` after writing.
+
+### Inspect Tracks
+
+```python
+import flavpy
+
+inspector = flavpy.Inspector("output.mp4")
+print(inspector.get_track())
+# Example: ["video", "sound", "taste"]
+```
+
+### Create a Taste-Only FlavMP4
+
+```python
+import numpy as np
+import flavpy
+
+with flavpy.FlavWriter("taste_only.mp4", "taste", codec="raw5", fps=30) as writer:
+    writer.write(np.array([10, 20, 30, 40, 50], dtype=np.uint8))
+    writer.write(np.array([20, 30, 40, 50, 60], dtype=np.uint8))
+```
 
 ### Structure
 
